@@ -29,39 +29,8 @@ onMounted(() => {
 
 function listenGameUpdate() {
   Mitt.on('game_update', (gameStateUpdate: GameState) => {
-    // const gameStatePlayersMap = new Map(gameState.value.players.map(player => [player.playerId, player]));
-
-    // // Iterate and update players
-    // for (const updatedPlayer of gameStateUpdate.players) {
-    //   if (gameStatePlayersMap.has(updatedPlayer.playerId)) {
-    //     const frontendPlayer = gameStatePlayersMap.get(updatedPlayer.playerId);
-    //     if (frontendPlayer) {
-    //       frontendPlayer.positionX = updatedPlayer.positionX;
-    //       frontendPlayer.positionY = updatedPlayer.positionY;
-    //       frontendPlayer.angle = updatedPlayer.angle;
-    //     }
-    //   }
-    // }
-
-    // // Create a map for quick lookup of current frontend players
-    // const gameStatePlayersMap = new Map(gameState.value.players.map(player => [player.playerId, player]));
-
-    // // Update existing players and add new players
-    // gameState.value.players = gameStateUpdate.players.map(updatedPlayer => {
-    //   const frontendPlayer = gameStatePlayersMap.get(updatedPlayer.playerId);
-    //   if (frontendPlayer) {
-    //     // Update existing player
-    //     return { ...frontendPlayer, ...updatedPlayer };
-    //   } else {
-    //     // Add new player
-    //     return updatedPlayer;
-    //   }
-    // });
-
-    // Remove players that no longer exist
-    //     const updatedPlayersMap = new Map(gameStateUpdate.players.map(player => [player.playerId, player]));
-    // gameState.value.players = gameState.value.players.filter(player => updatedPlayersMap.has(player.playerId));
-
+    console.log(gameStateUpdate)
+    // gameState.value = gameStateUpdate
     // Create a map for quick lookup of current frontend players
     const gameStatePlayersMap = new Map(gameState.value.players.map(player => [player.playerId, player]));
 
@@ -73,6 +42,7 @@ function listenGameUpdate() {
         frontendPlayer.positionX = updatedPlayer.positionX;
         frontendPlayer.positionY = updatedPlayer.positionY;
         frontendPlayer.angle = updatedPlayer.angle;
+        frontendPlayer.health = updatedPlayer.health
       } else {
         // Add new player to the map and the gameState value
         gameStatePlayersMap.set(updatedPlayer.playerId, updatedPlayer);
@@ -110,36 +80,6 @@ function listenGameUpdate() {
 }
 
 
-// function getGame(): Promise<Lobby | null> {
-//   let timeout: any;
-//   return new Promise((resolve, reject) => {
-//     try {
-//       store.sendMessage("get_game", { playerId: route.query.playerId })
-//       // Listen for the response
-//       Mitt.on('lobby_init',
-//         (lobby: Lobby) => {
-//           console.log(lobby)
-//           clearTimeout(timeout); // Clear the timeout on successful response
-//           resolve(lobby); // Resolve the promise with the data
-//           Mitt.off('playerId'); // Remove the event listener
-//         },
-//       );
-//       // Set a timeout to resolve the promise if not resolved within 5 seconds
-//       const timeout = setTimeout(() => {
-//         console.log("timing out")
-//         Mitt.off('lobby_init');
-//         resolve(null);
-//       }, 5000);
-//     } catch (error) {
-//       if (timeout) {
-//         clearTimeout(timeout); // Clear the timeout in case of an exception
-//       }
-//       Mitt.off('lobby_init'); // Remove the event listener
-//       resolve(null); // Resolve with null in case of an exception
-//     }
-//   });
-// }
-
 const canvasWidth = ref(window.innerWidth)
 const canvasHeight = ref(window.innerHeight)
 
@@ -166,6 +106,7 @@ function updateMousePosition(event: any) {
     y: event.clientY - bounds.top
   }
 }
+
 
 onTick((delta) => {
   const playerUpdate: PlayerCapturedControls = {
@@ -194,6 +135,28 @@ function shootProjectile() {
     <div class="game-stats">
       {{ keysPressed }}
       height:{{ canvasHeight }} width: {{ canvasWidth }}
+    </div>
+    <div class="player-info-bar">
+      <!-- {{ gameState }} -->
+      <div class="player player-left" v-if="gameState.players.length > 0">
+        <div class="player-name">{{ gameState.players[0].username }}</div>
+        <div class="health-bar">
+          <div class="health" :style="{ width: gameState.players[0].health + '%' }"></div>
+        </div>
+      </div>
+      <div v-else>
+        <div class="waiting-message">Waiting for Player 1 to join...</div>
+      </div>
+
+      <div class="player player-right" v-if="gameState.players.length > 1">
+        <div class="player-name">{{ gameState.players[1].username }}</div>
+        <div class="health-bar">
+          <div class="health" :style="{ width: gameState.players[1].health + '%' }"></div>
+        </div>
+      </div>
+      <div v-else>
+        <div class="waiting-message">Waiting for Player 2 to join...</div>
+      </div>
     </div>
 
     <div @mousemove="updateMousePosition" @click="shootProjectile">
@@ -227,5 +190,63 @@ function shootProjectile() {
   bottom: 0;
   right: 0;
 }
-</style>
 
+.player-info-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.player {
+
+  width: 30%;
+}
+
+.player-left {
+  align-items: flex-start;
+}
+
+.player-left {
+  text-align: right;
+}
+
+.player-name {
+  color: white;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+
+.health-bar {
+  width: 100%;
+  height: 25px;
+  background-color: #555;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+
+.player-right .health-bar {
+  transform: scaleX(-1);
+}
+
+.health {
+  height: 100%;
+  background-color: #00ff00;
+  transition: width 0.5s ease;
+}
+
+
+.waiting-message {
+  color: white;
+  font-size: 1.2rem;
+  text-align: center;
+  margin-top: 10px;
+}
+</style>

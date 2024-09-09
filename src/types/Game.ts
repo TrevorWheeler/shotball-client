@@ -1,38 +1,38 @@
 export interface GameState {
-  gameId: string;
+  gameId: string
   players: Player[]
   projectiles: Projectile[]
 }
 
 export interface Player {
-  playerId: string;
-  username: string;
-  positionX: number;
-  positionY: number;
+  playerId: string
+  username: string
+  health: number
+  positionX: number
+  positionY: number
   // controls: PlayerDirection
   angle: number
 }
 
-
 export interface GameEnter {
-  token: string;
+  token: string
   gameState: GameState
 }
 
 export interface PlayerCapturedControls {
-  up: boolean;
-  left: boolean;
-  right: boolean;
-  down: boolean;
-  mousePositionY: number;
+  up: boolean
+  left: boolean
+  right: boolean
+  down: boolean
+  mousePositionY: number
   mousePositionX: number
 }
 
 export interface Projectile {
-  projectileId: string;
-  playerId: string;
-  positionX: number;
-  positionY: number;
-  velocityX: number;
-  velocityY: number;
+  projectileId: string
+  playerId: string
+  positionX: number
+  positionY: number
+  velocityX: number
+  velocityY: number
 }
