@@ -77,6 +77,11 @@ function listenGameUpdate() {
     // Remove Non-Existing Projectiles
     gameState.value.projectiles = gameState.value.projectiles.filter(proj => gameStateUpdateProjectilesMap.has(proj.projectileId));
   })
+
+  Mitt.on('player_death', (playerId: string) => {
+    console.log('player_death', playerId)
+    alert('Player ' + playerId + ' has died!')
+  })
 }
 
 
